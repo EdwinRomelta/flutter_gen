@@ -122,17 +122,20 @@ AssetType _constructAssetTree(List<String> assetRelativePathList, String name) {
 
 _Statement _createAssetTypeStatement(
   File pubspecFile,
+  String name,
   AssetType assetType,
   List<Integration> integrations,
   String Function(AssetType) createName,
 ) {
   final childAssetAbsolutePath = join(pubspecFile.parent.path, assetType.path);
   _Statement statement;
+  final path = assetType.path.startsWith('lib') ?
+    assetType.path.replaceFirst('lib','packages/$name') : assetType.path;
   if (assetType.isSupportedImage) {
     statement = _Statement(
       type: 'AssetGenImage',
       name: createName(assetType),
-      value: 'AssetGenImage\(\'${posixStyle(assetType.path)}\'\)',
+      value: 'AssetGenImage\(\'${posixStyle(path)}\'\)',
       isConstConstructor: true,
     );
   } else if (FileSystemEntity.isDirectorySync(childAssetAbsolutePath)) {
@@ -152,7 +155,7 @@ _Statement _createAssetTypeStatement(
       statement = _Statement(
         type: 'String',
         name: createName(assetType),
-        value: '\'${posixStyle(assetType.path)}\'',
+        value: '\'${posixStyle(path)}\'',
         isConstConstructor: false,
       );
     } else {
@@ -160,7 +163,7 @@ _Statement _createAssetTypeStatement(
       statement = _Statement(
         type: integration.className,
         name: createName(assetType),
-        value: integration.classInstantiate(posixStyle(assetType.path)),
+        value: integration.classInstantiate(posixStyle(path)),
         isConstConstructor: integration.isConstConstructor,
       );
     }
@@ -192,6 +195,7 @@ String _dotDelimiterStyleDefinition(
           .map(
             (child) => _createAssetTypeStatement(
               pubspecFile,
+              name,
               child,
               integrations,
               (element) => element.baseName.camelCase(),
@@ -273,6 +277,7 @@ String _flatStyleDefinition(
       .map(
         (relativePath) => _createAssetTypeStatement(
           pubspecFile,
+          name,
           AssetType(relativePath),
           integrations,
           createName,

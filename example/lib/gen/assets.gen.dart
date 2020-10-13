@@ -43,19 +43,21 @@ class $AssetsJsonGen {
 class $LibImagesGen {
   const $LibImagesGen();
 
-  SvgGenImage get fuchsia => const SvgGenImage('lib/images/fuchsia.svg');
+  SvgGenImage get fuchsia =>
+      const SvgGenImage('packages/example/images/fuchsia.svg');
 }
 
 class $LibJsonGen {
   const $LibJsonGen();
 
-  String get fruits => 'lib/json/fruits.json';
+  String get fruits => 'packages/example/json/fruits.json';
 }
 
 class $LibPicturesGen {
   const $LibPicturesGen();
 
-  AssetGenImage get chip5 => const AssetGenImage('lib/pictures/chip5.jpg');
+  AssetGenImage get chip5 =>
+      const AssetGenImage('packages/example/pictures/chip5.jpg');
 }
 
 class $AssetsImagesChip3Gen {
