@@ -19,6 +19,7 @@ String generateAssets(
   DartFormatter formatter,
   FlutterGen flutterGen,
   FlutterAssets assets,
+  String name,
 ) {
   if (assets == null || !assets.hasAssets) {
     throw InvalidSettingsException(
@@ -39,13 +40,15 @@ String generateAssets(
       !flutterGen.hasAssets ||
       flutterGen.assets.isDefaultStyle) {
     classesBuffer.writeln(
-        _dotDelimiterStyleDefinition(pubspecFile, assets, integrations));
+        _dotDelimiterStyleDefinition(pubspecFile, assets, name,integrations));
   } else if (flutterGen.assets.isSnakeCaseStyle) {
     classesBuffer
-        .writeln(_snakeCaseStyleDefinition(pubspecFile, assets, integrations));
+        .writeln(_snakeCaseStyleDefinition(
+        pubspecFile, assets, name,integrations));
   } else if (flutterGen.assets.isCamelCaseStyle) {
     classesBuffer
-        .writeln(_camelCaseStyleDefinition(pubspecFile, assets, integrations));
+        .writeln(_camelCaseStyleDefinition(
+        pubspecFile, assets, name,integrations));
   } else {
     throw 'The value of "flutter_gen/assets/style." is incorrect.';
   }
@@ -73,6 +76,7 @@ String generateAssets(
 List<String> _getAssetRelativePathList(
   File pubspecFile,
   FlutterAssets assets,
+  String name,
 ) {
   final assetRelativePathList = <String>[];
   for (final assetName in assets.assets) {
@@ -86,12 +90,14 @@ List<String> _getAssetRelativePathList(
     } else if (FileSystemEntity.isFileSync(assetAbsolutePath)) {
       assetRelativePathList
           .add(relative(assetAbsolutePath, from: pubspecFile.parent.path));
+    } else if (assetName.startsWith('packages/$name')) {
+      assetRelativePathList.add(assetName.replaceFirst('packages/$name', 'lib'));
     }
   }
   return assetRelativePathList;
 }
 
-AssetType _constructAssetTree(List<String> assetRelativePathList) {
+AssetType _constructAssetTree(List<String> assetRelativePathList, String name) {
   // Relative path is the key
   final assetTypeMap = <String, AssetType>{
     '.': AssetType('.'),
@@ -166,17 +172,19 @@ _Statement _createAssetTypeStatement(
 String _dotDelimiterStyleDefinition(
   File pubspecFile,
   FlutterAssets assets,
+  String name,
   List<Integration> integrations,
 ) {
   final buffer = StringBuffer();
-  final assetRelativePathList = _getAssetRelativePathList(pubspecFile, assets);
+  final assetRelativePathList = _getAssetRelativePathList(
+      pubspecFile, assets, name);
   final assetsStaticStatements = <_Statement>[];
 
   final assetTypeQueue = ListQueue<AssetType>.from(
-      _constructAssetTree(assetRelativePathList).children);
+      _constructAssetTree(assetRelativePathList, name).children);
 
   while (assetTypeQueue.isNotEmpty) {
-    final assetType = assetTypeQueue.removeFirst();
+    var assetType = assetTypeQueue.removeFirst();
     final assetAbsolutePath = join(pubspecFile.parent.path, assetType.path);
 
     if (FileSystemEntity.isDirectorySync(assetAbsolutePath)) {
@@ -220,12 +228,14 @@ String _dotDelimiterStyleDefinition(
 String _camelCaseStyleDefinition(
   File pubspecFile,
   FlutterAssets assets,
+  String name,
   List<Integration> integrations,
 ) {
   return _flatStyleDefinition(
     pubspecFile,
     assets,
     integrations,
+    name,
     (assetType) => withoutExtension(assetType.path)
         .replaceFirst(RegExp(r'asset(s)?'), '')
         .camelCase(),
@@ -236,12 +246,14 @@ String _camelCaseStyleDefinition(
 String _snakeCaseStyleDefinition(
   File pubspecFile,
   FlutterAssets assets,
+  String name,
   List<Integration> integrations,
 ) {
   return _flatStyleDefinition(
     pubspecFile,
     assets,
     integrations,
+    name,
     (assetType) => withoutExtension(assetType.path)
         .replaceFirst(RegExp(r'asset(s)?'), '')
         .snakeCase(),
@@ -252,9 +264,10 @@ String _flatStyleDefinition(
   File pubspecFile,
   FlutterAssets assets,
   List<Integration> integrations,
+  String name,
   String Function(AssetType) createName,
 ) {
-  final statements = _getAssetRelativePathList(pubspecFile, assets)
+  final statements = _getAssetRelativePathList(pubspecFile, assets, name)
       .distinct()
       .sorted()
       .map(

@@ -50,7 +50,8 @@ class FlutterGenerator {
 
       if (config.flutter.hasAssets) {
         final generated = generateAssets(
-            pubspecFile, formatter, config.flutterGen, config.flutter.assets);
+            pubspecFile, formatter, config.flutterGen,
+            config.flutter.assets, config.name);
         final assets = File(normalize(
             join(pubspecFile.parent.path, output, 'assets.gen.dart')));
         writeAsString(generated, file: assets);

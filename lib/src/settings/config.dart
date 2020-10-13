@@ -17,6 +17,7 @@ class Config {
   final File pubspecFile;
   Flutter flutter;
   FlutterGen flutterGen;
+  String name;
 
   Future<Config> load() async {
     print('FlutterGen Loading ... '
@@ -40,6 +41,9 @@ class Config {
     }
     if (properties.containsKey('flutter_gen')) {
       flutterGen = FlutterGen(safeCast<YamlMap>(properties['flutter_gen']));
+    }
+    if (properties.containsKey('name')) {
+      name = properties['name'];
     }
 
     if (!hasFlutter && !hasFlutterGen) {
