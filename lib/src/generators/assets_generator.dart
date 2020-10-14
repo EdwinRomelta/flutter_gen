@@ -206,6 +206,9 @@ String _dotDelimiterStyleDefinition(
 
       if (assetType.isDefaultAssetsDirectory) {
         assetsStaticStatements.addAll(statements);
+      } else if(assetType.path == 'lib') {
+        buffer.writeln(_directoryClassGenDefinition(
+            '${name.capitalize()}Assets', statements));
       } else {
         final className = '\$${assetType.path.camelCase().capitalize()}Gen';
         buffer.writeln(_directoryClassGenDefinition(className, statements));
@@ -271,22 +274,51 @@ String _flatStyleDefinition(
   String name,
   String Function(AssetType) createName,
 ) {
-  final statements = _getAssetRelativePathList(pubspecFile, assets, name)
-      .distinct()
+  final buffer = StringBuffer();
+  final assetRelativePathList =
+      _getAssetRelativePathList(pubspecFile, assets, name);
+  buffer.writeln(_directoryClassGenDefinition(
+      '${name.capitalize()}Assets', _createStatement(
+    pubspecFile,
+    assetRelativePathList.where((path) => path.startsWith('lib/'))
+        .toList(growable: false),
+    integrations,
+    name,
+        (assetType) => withoutExtension(assetType.path)
+        .replaceFirst(RegExp(r'asset(s)?'), '')
+        .snakeCase(),
+  )));
+  buffer.writeln(_assetsClassDefinition(_createStatement(
+    pubspecFile,
+    assetRelativePathList.where((path) => !path.startsWith('lib/'))
+        .toList(growable: false),
+    integrations,
+    name,
+        (assetType) => withoutExtension(assetType.path)
+        .replaceFirst(RegExp(r'asset(s)?'), '')
+        .snakeCase(),
+  )));
+  return buffer.toString();
+}
+
+List<_Statement> _createStatement(
+    File pubspecFile,
+    List<String> assetRelativePathList,
+    List<Integration> integrations,
+    String name,
+    String Function(AssetType) createName,)=> assetRelativePathList.distinct()
       .sorted()
       .map(
         (relativePath) => _createAssetTypeStatement(
-          pubspecFile,
-          name,
-          AssetType(relativePath),
-          integrations,
-          createName,
-        ),
-      )
+      pubspecFile,
+      name,
+      AssetType(relativePath),
+      integrations,
+      createName,
+    ),
+  )
       .whereType<_Statement>()
       .toList();
-  return _assetsClassDefinition(statements);
-}
 
 String _assetsClassDefinition(List<_Statement> statements) {
   final statementsBlock = statements

@@ -7,8 +7,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/services.dart';
 
-class $LibGen {
-  const $LibGen();
+class ExampleAssets {
+  const ExampleAssets();
 
   $LibImagesGen get images => const $LibImagesGen();
   $LibJsonGen get json => const $LibJsonGen();
@@ -88,7 +88,6 @@ class Assets {
 
   static const $AssetsImagesGen images = $AssetsImagesGen();
   static const $AssetsJsonGen json = $AssetsJsonGen();
-  static const $LibGen lib = $LibGen();
   static const $PicturesGen pictures = $PicturesGen();
 }
 
