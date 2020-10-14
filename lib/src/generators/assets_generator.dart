@@ -284,7 +284,7 @@ String _flatStyleDefinition(
         .toList(growable: false),
     integrations,
     name,
-        (assetType) => withoutExtension(assetType.path)
+        (assetType) => withoutExtension(assetType.path.replaceFirst('lib/', ''))
         .replaceFirst(RegExp(r'asset(s)?'), '')
         .snakeCase(),
   )));
