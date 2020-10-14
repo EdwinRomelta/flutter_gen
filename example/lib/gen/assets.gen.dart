@@ -7,8 +7,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/services.dart';
 
-class ExampleAssets {
-  const ExampleAssets();
+class FlutterGenAssets {
+  const FlutterGenAssets();
 
   $LibImagesGen get images => const $LibImagesGen();
   $LibJsonGen get json => const $LibJsonGen();

@@ -20,6 +20,7 @@ String generateAssets(
   FlutterGen flutterGen,
   FlutterAssets assets,
   String name,
+  String packageName,
 ) {
   if (assets == null || !assets.hasAssets) {
     throw InvalidSettingsException(
@@ -40,15 +41,16 @@ String generateAssets(
       !flutterGen.hasAssets ||
       flutterGen.assets.isDefaultStyle) {
     classesBuffer.writeln(
-        _dotDelimiterStyleDefinition(pubspecFile, assets, name,integrations));
+        _dotDelimiterStyleDefinition(
+            pubspecFile, assets, name, packageName, integrations));
   } else if (flutterGen.assets.isSnakeCaseStyle) {
     classesBuffer
         .writeln(_snakeCaseStyleDefinition(
-        pubspecFile, assets, name,integrations));
+        pubspecFile, assets, name, packageName, integrations));
   } else if (flutterGen.assets.isCamelCaseStyle) {
     classesBuffer
         .writeln(_camelCaseStyleDefinition(
-        pubspecFile, assets, name,integrations));
+        pubspecFile, assets, name, packageName, integrations));
   } else {
     throw 'The value of "flutter_gen/assets/style." is incorrect.';
   }
@@ -176,6 +178,7 @@ String _dotDelimiterStyleDefinition(
   File pubspecFile,
   FlutterAssets assets,
   String name,
+  String packageName,
   List<Integration> integrations,
 ) {
   final buffer = StringBuffer();
@@ -208,7 +211,7 @@ String _dotDelimiterStyleDefinition(
         assetsStaticStatements.addAll(statements);
       } else if(assetType.path == 'lib') {
         buffer.writeln(_directoryClassGenDefinition(
-            '${name.capitalize()}Assets', statements));
+            '${packageName}Assets', statements));
       } else {
         final className = '\$${assetType.path.camelCase().capitalize()}Gen';
         buffer.writeln(_directoryClassGenDefinition(className, statements));
@@ -236,6 +239,7 @@ String _camelCaseStyleDefinition(
   File pubspecFile,
   FlutterAssets assets,
   String name,
+  String packageName,
   List<Integration> integrations,
 ) {
   return _flatStyleDefinition(
@@ -243,6 +247,7 @@ String _camelCaseStyleDefinition(
     assets,
     integrations,
     name,
+    packageName,
     (assetType) => withoutExtension(assetType.path)
         .replaceFirst(RegExp(r'asset(s)?'), '')
         .camelCase(),
@@ -254,6 +259,7 @@ String _snakeCaseStyleDefinition(
   File pubspecFile,
   FlutterAssets assets,
   String name,
+  String packageName,
   List<Integration> integrations,
 ) {
   return _flatStyleDefinition(
@@ -261,6 +267,7 @@ String _snakeCaseStyleDefinition(
     assets,
     integrations,
     name,
+    packageName,
     (assetType) => withoutExtension(assetType.path)
         .replaceFirst(RegExp(r'asset(s)?'), '')
         .snakeCase(),
@@ -272,13 +279,14 @@ String _flatStyleDefinition(
   FlutterAssets assets,
   List<Integration> integrations,
   String name,
+  String packageName,
   String Function(AssetType) createName,
 ) {
   final buffer = StringBuffer();
   final assetRelativePathList =
       _getAssetRelativePathList(pubspecFile, assets, name);
   buffer.writeln(_directoryClassGenDefinition(
-      '${name.capitalize()}Assets', _createStatement(
+      '${packageName}Assets', _createStatement(
     pubspecFile,
     assetRelativePathList.where((path) => path.startsWith('lib/'))
         .toList(growable: false),

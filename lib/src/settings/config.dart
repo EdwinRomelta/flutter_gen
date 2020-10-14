@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
+import 'package:dartx/dartx.dart';
 
 import '../utils/cast.dart';
 import '../utils/error.dart';
@@ -36,14 +37,14 @@ class Config {
 
     final properties = safeCast<YamlMap>(loadYaml(pubspec));
 
+    if (properties.containsKey('name')) {
+      name = properties['name'];
+    }
     if (properties.containsKey('flutter')) {
       flutter = Flutter(safeCast<YamlMap>(properties['flutter']));
     }
     if (properties.containsKey('flutter_gen')) {
       flutterGen = FlutterGen(safeCast<YamlMap>(properties['flutter_gen']));
-    }
-    if (properties.containsKey('name')) {
-      name = properties['name'];
     }
 
     if (!hasFlutter && !hasFlutterGen) {
