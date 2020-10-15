@@ -53,7 +53,9 @@ class FlutterGenerator {
         final generated = generateAssets(
             pubspecFile, formatter, config.flutterGen,
             config.flutter.assets, config.name,
-            config.flutterGen.assets.packageName ?? config.name.capitalize());
+            config.flutterGen?.assets?.packageName != null ?
+              config.flutterGen.assets.packageName :
+              "${config.name.capitalize()}Assets");
         final assets = File(normalize(
             join(pubspecFile.parent.path, output, 'assets.gen.dart')));
         writeAsString(generated, file: assets);

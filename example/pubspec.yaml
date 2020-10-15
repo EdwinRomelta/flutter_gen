@@ -30,7 +30,7 @@ flutter_gen:
     flutter_svg: true
 
   assets:
-    packageName: FlutterGen
+    packageName: FlutterGenAsset
     # Assets.imagesChip
     # style: camel-case
 

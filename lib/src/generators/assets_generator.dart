@@ -210,8 +210,7 @@ String _dotDelimiterStyleDefinition(
       if (assetType.isDefaultAssetsDirectory) {
         assetsStaticStatements.addAll(statements);
       } else if(assetType.path == 'lib') {
-        buffer.writeln(_directoryClassGenDefinition(
-            '${packageName}Assets', statements));
+        buffer.writeln(_assetsClassDefinition(statements , packageName));
       } else {
         final className = '\$${assetType.path.camelCase().capitalize()}Gen';
         buffer.writeln(_directoryClassGenDefinition(className, statements));
@@ -285,8 +284,8 @@ String _flatStyleDefinition(
   final buffer = StringBuffer();
   final assetRelativePathList =
       _getAssetRelativePathList(pubspecFile, assets, name);
-  buffer.writeln(_directoryClassGenDefinition(
-      '${packageName}Assets', _createStatement(
+  buffer.writeln(_assetsClassDefinition(
+      _createStatement(
     pubspecFile,
     assetRelativePathList.where((path) => path.startsWith('lib/'))
         .toList(growable: false),
@@ -295,7 +294,7 @@ String _flatStyleDefinition(
         (assetType) => withoutExtension(assetType.path.replaceFirst('lib/', ''))
         .replaceFirst(RegExp(r'asset(s)?'), '')
         .snakeCase(),
-  )));
+  ), packageName ));
   buffer.writeln(_assetsClassDefinition(_createStatement(
     pubspecFile,
     assetRelativePathList.where((path) => !path.startsWith('lib/'))
@@ -328,13 +327,14 @@ List<_Statement> _createStatement(
       .whereType<_Statement>()
       .toList();
 
-String _assetsClassDefinition(List<_Statement> statements) {
+String _assetsClassDefinition(List<_Statement> statements,
+    [String name = "Assets"]) {
   final statementsBlock = statements
       .map((statement) => '  ${statement.toStaticFieldString()}')
       .join('\n');
   return '''
-class Assets {
-  Assets._();
+class $name {
+  $name._();
   
   $statementsBlock
 }
